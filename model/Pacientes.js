@@ -139,7 +139,7 @@ export default class Pacientes {
         const conexion = DataBase.getInstance();
         const correoNormalizado = correo && String(correo).trim() ? String(correo).trim() : null;
 
-        const consultaValidacionRut = `SELECT 1 FROM pacienteDatos WHERE rut = ? AND estado_paciente <> 0`;
+        const consultaValidacionRut = `SELECT 1 FROM pacienteDatos WHERE rut = ?`;
         const paramsRut = [rut];
 
         const resultadoValidacion =  await conexion.ejecutarQuery(consultaValidacionRut,paramsRut)
@@ -173,6 +173,9 @@ export default class Pacientes {
                 return resultado;
             }
         } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') {
+                return { duplicado: true };
+            }
             console.error("[Pacientes.js] Error SQL en insertPaciente:", error);
             throw error;
         }
@@ -231,6 +234,9 @@ export default class Pacientes {
             }
 
         } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') {
+                return { duplicado: true };
+            }
             throw new Error('NO se logo ingresar paciente nuevo / Problema al establecer la conexion con la base de datos desde la clase Pacientes.js')
         }
     }
